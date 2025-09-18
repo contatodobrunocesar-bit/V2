@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Document, DocumentType } from '../types';
 import { PlusIcon, FilePdfIcon, FileWordIcon, FileImageIcon, DownloadIcon, TrashIcon, FileTextIcon, EditIcon } from '../components/Icons';
@@ -57,7 +56,11 @@ const Documents: React.FC<DocumentsProps> = ({ documents, onEditImage, onUploadC
                                             <span>{doc.name}</span>
                                         </div>
                                     </th>
-                                    <td className="px-6 py-4">{doc.campaignName}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={doc.campaignName === 'Documento Geral' ? 'text-gray-500 italic' : ''}>
+                                            {doc.campaignName || 'Documento Geral'}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4">{new Date(doc.uploadedAt).toLocaleDateString()}</td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">

@@ -86,7 +86,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onEdit, responsib
     };
 
     const relatedDocuments = React.useMemo(() => {
-        return documents.filter(doc => doc.campaignId === campaign.id);
+        return documents.filter(doc => doc.campaignId === campaign.id && doc.campaignId !== '');
     }, [documents, campaign.id]);
 
     return (
