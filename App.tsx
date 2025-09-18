@@ -574,6 +574,14 @@ const App: React.FC = () => {
         }
     };
     
+    const handleEditTeamMemberName = (oldName: string, newName: string) => {
+        const updatedMembers = teamMembers.map(m =>
+            m.name === oldName ? { ...m, name: newName as Responsible } : m
+        );
+        dataService.setTeamMembers(updatedMembers);
+        setTeamMembers(updatedMembers);
+    };
+
     const handleAddUser = (newUser: Omit<User, 'image'>) => {
         const user: User = {
             ...newUser,
@@ -651,6 +659,7 @@ const App: React.FC = () => {
                         onEditCurrentUserImage={handleEditCurrentUserImage}
                         teamMembers={teamMembers}
                         onEditTeamMemberImage={handleEditTeamMemberImage}
+                        onEditTeamMemberName={handleEditTeamMemberName}
                         onAddTeamMember={handleAddTeamMember}
                         users={users}
                         onAddUser={handleAddUser}

@@ -9,6 +9,7 @@ interface SettingsProps {
     onEditCurrentUserImage: () => void;
     teamMembers: ResponsibleUser[];
     onEditTeamMemberImage: (memberName: string) => void;
+    onEditTeamMemberName: (oldName: string, newName: string) => void;
     onAddTeamMember: (name: string) => void;
     users: User[];
     onAddUser: (newUser: Omit<User, 'image'>) => void;
@@ -96,7 +97,10 @@ const ProfileSettingsCard: React.FC<Pick<SettingsProps, 'currentUser' | 'onUpdat
 };
 
 const TeamManagementCard: React.FC<Pick<SettingsProps, 'teamMembers' | 'onEditTeamMemberImage' | 'onAddTeamMember'>> = ({ teamMembers, onEditTeamMemberImage, onAddTeamMember }) => {
+const TeamManagementCard: React.FC<Pick<SettingsProps, 'teamMembers' | 'onEditTeamMemberImage' | 'onEditTeamMemberName' | 'onAddTeamMember'>> = ({ teamMembers, onEditTeamMemberImage, onEditTeamMemberName, onAddTeamMember }) => {
     const [newMemberName, setNewMemberName] = useState('');
+    const [editingMemberName, setEditingMemberName] = useState<string | null>(null);
+    const [editedName, setEditedName] = useState('');
 
     const handleAdd = () => {
         if (newMemberName.trim()) {
@@ -105,6 +109,23 @@ const TeamManagementCard: React.FC<Pick<SettingsProps, 'teamMembers' | 'onEditTe
         }
     };
 
+    const handleStartEdit = (memberName: string) => {
+        setEditingMemberName(memberName);
+        setEditedName(memberName);
+    };
+
+    const handleSaveEdit = () => {
+        if (editedName.trim() && editingMemberName) {
+            onEditTeamMemberName(editingMemberName, editedName.trim());
+            setEditingMemberName(null);
+            setEditedName('');
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingMemberName(null);
+        setEditedName('');
+    };
     return (
         <SettingsCard title="Equipe de Atendimento" icon={<UsersIcon className="w-5 h-5" />}>
             <div className="max-h-60 overflow-y-auto pr-2">
@@ -112,11 +133,39 @@ const TeamManagementCard: React.FC<Pick<SettingsProps, 'teamMembers' | 'onEditTe
                     <div key={member.name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
                         <div className="flex items-center gap-3">
                             <img src={member.image} alt={member.name} className="w-10 h-10 rounded-full object-cover" />
-                            <span className="font-semibold">{member.name}</span>
+                            {editingMemberName === member.name ? (
+                                <input
+                                    type="text"
+                                    value={editedName}
+                                    onChange={(e) => setEditedName(e.target.value)}
+                                    className="font-semibold bg-gray-50 dark:bg-dark-accent border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm"
+                                    autoFocus
+                                />
+                            ) : (
+                                <span className="font-semibold">{member.name}</span>
+                            )}
                         </div>
-                        <button onClick={() => onEditTeamMemberImage(member.name)} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-dark-accent rounded-full transition-colors">
-                            <PencilIcon className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {editingMemberName === member.name ? (
+                                <>
+                                    <button onClick={handleSaveEdit} className="p-2 text-green-600 hover:bg-green-100 rounded-full transition-colors">
+                                        <SaveIcon className="w-5 h-5" />
+                                    </button>
+                                    <button onClick={handleCancelEdit} className="p-2 text-red-600 hover:bg-red-100 rounded-full transition-colors">
+                                        <XIcon className="w-5 h-5" />
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button onClick={() => handleStartEdit(member.name)} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-dark-accent rounded-full transition-colors" title="Editar nome">
+                                        <PencilIcon className="w-5 h-5" />
+                                    </button>
+                                    <button onClick={() => onEditTeamMemberImage(member.name)} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-dark-accent rounded-full transition-colors" title="Editar foto">
+                                        <UserIcon className="w-5 h-5" />
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>
