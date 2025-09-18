@@ -45,7 +45,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                 <div className="absolute top-0 left-0 w-full h-full bg-black opacity-20"></div>
                 <div className="z-10 text-center">
                     <h1 className="text-4xl font-bold mb-4">Pauta de Mídia SECOM</h1>
-                    <p className="text-xl opacity-90">Sistema de gestão de campanhas publicitárias</p>
                 </div>
                  {/* Decorative shapes */}
                 <div className="absolute -top-16 -left-16 w-48 h-48 bg-white/10 rounded-full animate-pulse"></div>
