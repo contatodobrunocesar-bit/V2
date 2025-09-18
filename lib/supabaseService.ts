@@ -147,7 +147,6 @@ export const campaignService = {
     const { data, error } = await supabase
       .from('campaigns')
       .select('*')
-      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error || !data) return [];
@@ -170,7 +169,6 @@ export const campaignService = {
       .from('campaigns')
       .update(convertCampaignToSupabase(campaign, userId))
       .eq('id', campaignId)
-      .eq('user_id', userId)
       .select()
       .single();
 
@@ -183,7 +181,6 @@ export const campaignService = {
       .from('campaigns')
       .delete()
       .eq('id', campaignId)
-      .eq('user_id', userId);
 
     if (error) throw error;
   },
@@ -213,7 +210,6 @@ export const teamService = {
     const { data, error } = await supabase
       .from('team_members')
       .select('*')
-      .eq('user_id', userId)
       .order('name');
 
     if (error || !data) return [];
@@ -249,7 +245,6 @@ export const teamService = {
         image: updates.image
       })
       .eq('name', memberName)
-      .eq('user_id', userId)
       .select()
       .single();
 
@@ -267,7 +262,6 @@ export const documentService = {
     const { data, error } = await supabase
       .from('documents')
       .select('*')
-      .eq('user_id', userId)
       .order('uploaded_at', { ascending: false });
 
     if (error || !data) return [];
@@ -315,7 +309,6 @@ export const notificationService = {
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
-      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error || !data) return [];
@@ -334,7 +327,6 @@ export const notificationService = {
       .from('notifications')
       .update({ read: true })
       .in('id', notificationIds)
-      .eq('user_id', userId);
 
     if (error) throw error;
   }
@@ -346,7 +338,7 @@ export const settingsService = {
     const { data, error } = await supabase
       .from('user_settings')
       .select('*')
-      .eq('user_id', userId)
+      .limit(1)
       .single();
 
     if (error || !data) {
@@ -382,7 +374,6 @@ export const integrationService = {
     const { data, error } = await supabase
       .from('integrations')
       .select('*')
-      .eq('user_id', userId);
 
     if (error || !data) return [];
     return data.map(row => ({
