@@ -178,6 +178,7 @@ const App: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [loadingError, setLoadingError] = useState<string | null>(null);
     const [syncStatus, setSyncStatus] = useState<dataService.SyncStatus>('idle');
+    const [skipLogin] = useState(true); // Para testes - pular login
     
     const initialIntegrations = useMemo(() => [
         { name: 'Slack', description: 'Receba notificações de status no Slack.', connected: true, requiresApiKey: false },
@@ -208,6 +209,26 @@ const App: React.FC = () => {
     
     useEffect(() => {
         const initializeApp = async () => {
+            // Para testes - fazer login automático
+            if (skipLogin) {
+                const { user: userFromSession, error } = await dataService.initializeData(initialIntegrations, setSyncStatus);
+                
+                if (error) {
+                    setLoadingError(error);
+                    setIsLoading(false);
+                    return;
+                }
+
+                // Forçar login com usuário mock
+                const mockUser = await dataService.login('bruno-silva@secom.rs.gov.br');
+                if (mockUser) {
+                    syncStateFromService();
+                    setIsAuthenticated(true);
+                }
+                setIsLoading(false);
+                return;
+            }
+
             const { user: userFromSession, error } = await dataService.initializeData(initialIntegrations, setSyncStatus);
             
             if (error) {
@@ -223,7 +244,7 @@ const App: React.FC = () => {
             setIsLoading(false);
         };
         initializeApp();
-    }, [initialIntegrations, syncStateFromService]);
+    }, [initialIntegrations, syncStateFromService, skipLogin]);
 
 
     const [filters, setFilters] = useState<Filters>({
