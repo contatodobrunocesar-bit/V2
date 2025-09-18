@@ -51,9 +51,6 @@ export const getSupabaseClient = () => {
   }
   return createMockSupabaseClient();
 };
-    }
-  }
-});
 
 // Tipos para facilitar o uso
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
