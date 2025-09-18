@@ -129,16 +129,37 @@ const setupRealtimeSubscriptions = (userId: string) => {
 // Autenticação
 export const login = async (email: string, password?: string): Promise<User | null> => {
   try {
+    // Validar domínio do e-mail
+    if (!email.endsWith('@secom.rs.gov.br')) {
+      throw new Error('Acesso restrito a funcionários da SECOM RS. Use seu e-mail institucional @secom.rs.gov.br');
+    }
+
+    // Validar senha padrão
+    if (password && password !== 'Gov@2025+') {
+      throw new Error('Senha incorreta');
+    }
+
+    // Determinar role baseado no e-mail
+    const isAdmin = email === 'bruno-silva@secom.rs.gov.br';
+    const userRole = isAdmin ? UserRole.Admin : UserRole.Analyst;
+    
     onSyncStatusChange('syncing');
     
     // Se Supabase não está configurado ou não funciona, usar modo offline
     if (!isSupabaseConfigured) {
       console.warn('Supabase não configurado - login offline');
-      currentUser = MOCK_CURRENT_USER;
+      // Criar usuário baseado no e-mail fornecido
+      const name = email.split('@')[0].replace(/[.-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      currentUser = {
+        name,
+        email,
+        role: userRole,
+        image: `https://i.pravatar.cc/150?u=${email}`
+      };
       currentUserId = 'offline-user';
       localState.teamMembers = MOCK_RESPONSIBLES;
       onSyncStatusChange('idle');
-      return MOCK_CURRENT_USER;
+      return currentUser;
     }
 
     // Usar senha padrão se não fornecida
@@ -152,7 +173,7 @@ export const login = async (email: string, password?: string): Promise<User | nu
       
       // Se falhar e for a senha padrão, tentar criar conta
       if (authResult.error && loginPassword === 'Gov@2025+') {
-        const name = email.split('@')[0].replace(/[.-]/g, ' ');
+        const name = email.split('@')[0].replace(/[.-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         authResult = await authService.signUp(email, loginPassword, name);
         if (authResult.error) {
           throw new Error('Erro ao fazer login ou criar conta: ' + authResult.error.message);
@@ -179,7 +200,13 @@ export const login = async (email: string, password?: string): Promise<User | nu
       // Se houver erro de rede (Failed to fetch), usar modo offline
       if (networkError.message?.includes('Failed to fetch') || networkError.message?.includes('fetch')) {
         console.warn('Erro de conexão - usando modo offline:', networkError.message);
-        currentUser = MOCK_CURRENT_USER;
+        const name = email.split('@')[0].replace(/[.-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        currentUser = {
+          name,
+          email,
+          role: userRole,
+          image: `https://i.pravatar.cc/150?u=${email}`
+        };
         currentUserId = 'offline-user';
         localState.teamMembers = MOCK_RESPONSIBLES;
         onSyncStatusChange('idle');
@@ -194,7 +221,13 @@ export const login = async (email: string, password?: string): Promise<User | nu
     // Fallback final para modo offline em caso de qualquer erro
     if (error.message?.includes('Failed to fetch') || error.message?.includes('fetch')) {
       console.warn('Fallback para modo offline devido a erro de rede');
-      currentUser = MOCK_CURRENT_USER;
+      const name = email.split('@')[0].replace(/[.-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      currentUser = {
+        name,
+        email,
+        role: userRole,
+        image: `https://i.pravatar.cc/150?u=${email}`
+      };
       currentUserId = 'offline-user';
       localState.teamMembers = MOCK_RESPONSIBLES;
       onSyncStatusChange('idle');

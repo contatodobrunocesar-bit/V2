@@ -22,9 +22,17 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
         setError('');
 
         try {
-            // Usar o sistema de login do dataService que integra com Supabase
+            // Validar domínio antes de tentar login
+            if (!email.endsWith('@secom.rs.gov.br')) {
+                setError('Acesso restrito a funcionários da SECOM RS. Use seu e-mail institucional @secom.rs.gov.br');
+                return;
+            }
+
+            // Usar senha padrão se não fornecida
+            const loginPassword = password || 'Gov@2025+';
+            
             const { login } = await import('../dataService');
-            const user = await login(email, password || undefined);
+            const user = await login(email, loginPassword);
             
             if (user) {
                 onLogin(user);

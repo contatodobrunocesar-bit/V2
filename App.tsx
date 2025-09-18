@@ -210,24 +210,24 @@ const App: React.FC = () => {
     useEffect(() => {
         const initializeApp = async () => {
             // Para testes - fazer login automático
-            if (skipLogin) {
-                const { user: userFromSession, error } = await dataService.initializeData(initialIntegrations, setSyncStatus);
+            // if (skipLogin) {
+            //     const { user: userFromSession, error } = await dataService.initializeData(initialIntegrations, setSyncStatus);
                 
-                if (error) {
-                    setLoadingError(error);
-                    setIsLoading(false);
-                    return;
-                }
+            //     if (error) {
+            //         setLoadingError(error);
+            //         setIsLoading(false);
+            //         return;
+            //     }
 
-                // Forçar login com usuário mock
-                const mockUser = await dataService.login('bruno-silva@secom.rs.gov.br');
-                if (mockUser) {
-                    syncStateFromService();
-                    setIsAuthenticated(true);
-                }
-                setIsLoading(false);
-                return;
-            }
+            //     // Forçar login com usuário mock
+            //     const mockUser = await dataService.login('bruno-silva@secom.rs.gov.br');
+            //     if (mockUser) {
+            //         syncStateFromService();
+            //         setIsAuthenticated(true);
+            //     }
+            //     setIsLoading(false);
+            //     return;
+            // }
 
             const { user: userFromSession, error } = await dataService.initializeData(initialIntegrations, setSyncStatus);
             
