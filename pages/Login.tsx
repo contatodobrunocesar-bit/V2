@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../types';
 import { MailIcon, LockIcon, EyeIcon, EyeOffIcon } from '../components/Icons';
-import { authService } from '../lib/supabaseService';
 
 interface LoginProps {
     onLogin: (user: User) => void;
@@ -17,26 +16,26 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
     const [isSignUp, setIsSignUp] = useState(false);
     const [name, setName] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
 
-        setTimeout(() => {
-            // Para compatibilidade, usar o sistema de login existente
-            if (email && password) {
-                const mockUser: User = {
-                    name: name || email.split('@')[0],
-                    email,
-                    role: 'Analista' as any,
-                    image: `https://i.pravatar.cc/150?u=${email}`
-                };
-                onLogin(mockUser);
+        try {
+            // Usar o sistema de login do dataService que integra com Supabase
+            const { login } = await import('../dataService');
+            const user = await login(email, password || undefined);
+            
+            if (user) {
+                onLogin(user);
             } else {
-                setError('E-mail ou senha inválidos. Tente novamente.');
+                setError('Erro ao fazer login. Verifique suas credenciais.');
             }
+        } catch (err: any) {
+            setError(err.message || 'Erro ao fazer login. Tente novamente.');
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
     
     return (
@@ -46,6 +45,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                 <div className="absolute top-0 left-0 w-full h-full bg-black opacity-20"></div>
                 <div className="z-10 text-center">
                     <h1 className="text-4xl font-bold mb-4">Pauta de Mídia SECOM</h1>
+                    <p className="text-xl opacity-90">Sistema de gestão de campanhas publicitárias</p>
                 </div>
                  {/* Decorative shapes */}
                 <div className="absolute -top-16 -left-16 w-48 h-48 bg-white/10 rounded-full animate-pulse"></div>
@@ -55,7 +55,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
             {/* Right Panel - Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
                 <div className="w-full max-w-md">
-                    <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Bem-vindo(a) de volta!</h2>
+                    <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+                        {isSignUp ? 'Criar Conta' : 'Bem-vindo(a) de volta!'}
+                    </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {isSignUp && (
