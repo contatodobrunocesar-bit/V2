@@ -364,12 +364,10 @@ const Settings: React.FC<SettingsProps> = (props) => {
                 <div className="space-y-6">
                     <ProfileSettingsCard {...props} />
                     <UserAccessCard {...props} />
-                    <DataManagementCard syncStatus={props.syncStatus} />
                 </div>
                 <div className="space-y-6">
                     <TeamManagementCard {...props} />
                     <NotificationSettingsCard {...props} />
-                    <IntegrationSettingsCard {...props} />
                 </div>
             </div>
         </div>
