@@ -96,7 +96,6 @@ const ProfileSettingsCard: React.FC<Pick<SettingsProps, 'currentUser' | 'onUpdat
     );
 };
 
-const TeamManagementCard: React.FC<Pick<SettingsProps, 'teamMembers' | 'onEditTeamMemberImage' | 'onAddTeamMember'>> = ({ teamMembers, onEditTeamMemberImage, onAddTeamMember }) => {
 const TeamManagementCard: React.FC<Pick<SettingsProps, 'teamMembers' | 'onEditTeamMemberImage' | 'onEditTeamMemberName' | 'onAddTeamMember'>> = ({ teamMembers, onEditTeamMemberImage, onEditTeamMemberName, onAddTeamMember }) => {
     const [newMemberName, setNewMemberName] = useState('');
     const [editingMemberName, setEditingMemberName] = useState<string | null>(null);
@@ -126,6 +125,7 @@ const TeamManagementCard: React.FC<Pick<SettingsProps, 'teamMembers' | 'onEditTe
         setEditingMemberName(null);
         setEditedName('');
     };
+
     return (
         <SettingsCard title="Equipe de Atendimento" icon={<UsersIcon className="w-5 h-5" />}>
             <div className="max-h-60 overflow-y-auto pr-2">
@@ -417,6 +417,8 @@ const Settings: React.FC<SettingsProps> = (props) => {
                 <div className="space-y-6">
                     <TeamManagementCard {...props} />
                     <NotificationSettingsCard {...props} />
+                    <IntegrationSettingsCard {...props} />
+                    <DataManagementCard syncStatus={props.syncStatus} />
                 </div>
             </div>
         </div>
