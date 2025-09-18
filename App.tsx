@@ -312,6 +312,9 @@ const App: React.FC = () => {
 
         const checkDeadlines = () => {
             const newNotifications: Notification[] = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Zerar horas para comparação exata de data
+            
             campaigns.forEach(c => {
                  const deadlines = [
                     { date: c.data_prevista_retorno_agencia, message: `Prazo de retorno para a agência da campanha ${c.campanha} está próximo.` },
@@ -320,10 +323,11 @@ const App: React.FC = () => {
 
                 deadlines.forEach(d => {
                     if (d.date) {
-                        const today = new Date();
                         const deadlineDate = new Date(d.date);
-                        const diffDays = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                        if (diffDays > 0 && diffDays <= 3) {
+                        deadlineDate.setHours(0, 0, 0, 0); // Zerar horas para comparação exata
+                        
+                        // Só mostrar notificação se for exatamente o dia do prazo
+                        if (deadlineDate.getTime() === today.getTime()) {
                             const notifId = `${c.id}-${d.date.toISOString().split('T')[0]}`;
                             // Prevent duplicate notifications
                             if (!notifications.some(n => n.id === notifId)) {
@@ -331,7 +335,7 @@ const App: React.FC = () => {
                                     id: notifId,
                                     campaignId: c.id,
                                     campaignName: c.campanha,
-                                    message: d.message,
+                                    message: `HOJE é o prazo de ${d.message.includes('retorno') ? 'retorno para a agência' : 'recebimento do relatório'} da campanha ${c.campanha}.`,
                                     timestamp: new Date(),
                                     read: false
                                 });
@@ -345,7 +349,7 @@ const App: React.FC = () => {
             }
         };
 
-        const intervalId = setInterval(checkDeadlines, 1000 * 60 * 60); // Check once an hour
+        const intervalId = setInterval(checkDeadlines, 1000 * 60 * 60 * 6); // Check every 6 hours
         checkDeadlines(); // Check immediately on load
 
         return () => clearInterval(intervalId);
