@@ -437,6 +437,19 @@ const App: React.FC = () => {
         return [...new Set(campaignNames)].sort();
     }, [campaigns]);
 
+    const filteredCampaigns = useMemo(() => {
+        return campaigns.filter(campaign => {
+            if (filters.agencia && campaign.agencia !== filters.agencia) return false;
+            if (filters.atendimento_responsavel && campaign.atendimento_responsavel !== filters.atendimento_responsavel) return false;
+            if (filters.cliente && campaign.cliente !== filters.cliente) return false;
+            if (filters.status_plano.length > 0 && !filters.status_plano.includes(campaign.status_plano)) return false;
+            if (filters.presenca_em.length > 0 && !filters.presenca_em.some(p => campaign.presenca_em?.includes(p))) return false;
+            if (filters.regioes_funcionais.length > 0 && !filters.regioes_funcionais.some(r => campaign.regioes_funcionais?.includes(r))) return false;
+            if (filters.periodo_inicio && campaign.periodo_inicio && new Date(campaign.periodo_inicio) < new Date(filters.periodo_inicio)) return false;
+            if (filters.periodo_fim && campaign.periodo_fim && new Date(campaign.periodo_fim) > new Date(filters.periodo_fim)) return false;
+            return true;
+        });
+    }, [campaigns, filters]);
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -489,6 +502,28 @@ const App: React.FC = () => {
                         
                         // Só mostrar notificação se for exatamente o dia do prazo
                         if (deadlineDate.getTime() === today.getTime()) {
+                            newNotifications.push({
+                                id: `deadline-${c.id}-${d.date}`,
+                                message: d.message,
+                                timestamp: new Date(),
+                                read: false,
+                                type: 'deadline'
+                            });
+                        }
+                    }
+                });
+            });
+
+            if (newNotifications.length > 0) {
+                setNotifications(prev => [...prev, ...newNotifications]);
+            }
+        };
+
+        checkDeadlines();
+        const interval = setInterval(checkDeadlines, 60000); // Verificar a cada minuto
+        return () => clearInterval(interval);
+    }, [campaigns, deadlineNotificationEnabled]);
+
     const handleNewCampaign = () => {
         setEditingCampaign(undefined);
         setIsModalOpen(true);
