@@ -202,27 +202,211 @@ const App: React.FC = () => {
     
     useEffect(() => {
         const initializeApp = async () => {
-            // Para testes - fazer login automático
-            // if (skipLogin) {
-            //     const { user: userFromSession, error } = await dataService.initializeData(initialIntegrations, setSyncStatus);
+            try {
+                const { user: userFromSession, error } = await dataService.initializeData(initialIntegrations, setSyncStatus);
                 
-            //     if (error) {
-            //         setLoadingError(error);
-            //         setIsLoading(false);
-            //         return;
-            //     }
+                if (error) {
+                    setLoadingError(error);
+                    setIsLoading(false);
+                    return;
+                }
 
-            //     // Forçar login com usuário mock
-            //     const mockUser = await dataService.login('bruno-silva@secom.rs.gov.br');
-            //     if (mockUser) {
-            //         syncStateFromService();
-            //         setIsAuthenticated(true);
-            //     }
-            //     setIsLoading(false);
-            //     return;
-            // }
+                syncStateFromService();
+                if (userFromSession) {
+                    setIsAuthenticated(true);
+                }
+                setIsLoading(false);
+            } catch (error: any) {
+                console.error('❌ Erro fatal na inicialização:', error);
+                setLoadingError(error.message || 'Erro ao inicializar o sistema');
+                setIsLoading(false);
+            }
+        };
+        
+        initializeApp();
+    }, [initialIntegrations, syncStateFromService]);
 
-            const { user: userFromSession, error } = await dataService.initializeData(initialIntegrations, setSyncStatus);
+    const handleLogin = async (user: User) => {
+        try {
+            setIsLoading(true);
+            const loggedInUser = await dataService.login(user.email);
+            if (loggedInUser) {
+                syncStateFromService();
+                setIsAuthenticated(true);
+            }
+        } catch (error: any) {
+            alert(error.message || 'Erro ao fazer login');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await dataService.logout();
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+        } catch (error: any) {
+            console.error('Erro ao fazer logout:', error);
+        }
+    };
+
+    const handleSaveCampaign = async (campaignData: Omit<Campaign, 'id' | 'created_at' | 'updated_at'>) => {
+        if (!currentUser) {
+            alert("Erro: usuário não autenticado.");
+            return;
+        }
+
+        try {
+            if (editingCampaign) {
+                const changes = generateChangeLog(editingCampaign, campaignData, currentUser);
+                const historyEntry: HistoryEntry = {
+                    user: currentUser.name,
+                    timestamp: new Date(),
+                    changes: changes.length > 0 ? changes : ['Nenhuma alteração de campo detectada, apenas salvamento.'],
+                };
+                
+                const updatedCampaign: Campaign = {
+                    ...editingCampaign,
+                    ...campaignData,
+                    updated_at: new Date(),
+                    history: [...(editingCampaign.history || []), historyEntry],
+                };
+                await dataService.updateCampaign(updatedCampaign);
+            } else {
+                const newCampaign: Campaign = {
+                    id: `uuid-${Date.now()}-${Math.random()}`,
+                    ...campaignData,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                    history: [{ user: currentUser.name, timestamp: new Date(), changes: ['Projeto criado.'] }]
+                };
+                await dataService.addCampaign(newCampaign);
+            }
+            syncStateFromService();
+            setIsModalOpen(false);
+            setEditingCampaign(undefined);
+        } catch (error: any) {
+            alert(error.message || 'Erro ao salvar campanha');
+        }
+    };
+    
+    const handleDeleteCampaign = async (campaignId: string) => {
+        try {
+            await dataService.deleteCampaign(campaignId);
+            syncStateFromService();
+            setIsModalOpen(false);
+            setEditingCampaign(undefined);
+        } catch (error: any) {
+            alert(error.message || 'Erro ao deletar campanha');
+        }
+    };
+
+    const handleCampaignStatusChange = async (campaignId: string, newStatus: Status) => {
+        const campaignToUpdate = campaigns.find(c => c.id === campaignId);
+        if (campaignToUpdate && currentUser) {
+            try {
+                const originalStatus = campaignToUpdate.status_plano;
+                const updatedCampaign: Campaign = {
+                    ...campaignToUpdate,
+                    status_plano: newStatus,
+                    updated_at: new Date(),
+                    history: [
+                        ...(campaignToUpdate.history || []),
+                        {
+                            user: currentUser.name,
+                            timestamp: new Date(),
+                            changes: [`Status alterado de "${originalStatus}" para "${newStatus}" via arrastar e soltar.`],
+                        },
+                    ],
+                };
+                await dataService.updateCampaign(updatedCampaign);
+                syncStateFromService();
+            } catch (error: any) {
+                alert(error.message || 'Erro ao alterar status da campanha');
+            }
+        }
+    };
+
+    const handleUpdateCurrentUser = async (updatedData: Partial<Omit<User, 'email' | 'role'>>) => {
+        try {
+            const updatedUser = await dataService.updateCurrentUser(updatedData);
+            if (updatedUser) {
+                setCurrentUser(updatedUser);
+                setUsers(dataService.getUsers());
+            }
+        } catch (error: any) {
+            alert(error.message || 'Erro ao atualizar perfil');
+        }
+    };
+
+    const handleDocUpload = async (file: File, campaignId: string) => {
+        try {
+            const campaign = campaignId !== 'none' ? campaigns.find(c => c.id === campaignId) : null;
+
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const newDocument: Document = {
+                    id: Date.now(),
+                    name: file.name,
+                    type: file.name.endsWith('.pdf') ? DocumentType.PDF : (file.name.endsWith('.docx') ? DocumentType.Word : DocumentType.Image),
+                    campaignId: campaign ? campaign.id : '',
+                    campaignName: campaign ? campaign.campanha : 'Documento Geral',
+                    uploadedAt: new Date().toISOString(),
+                    url: reader.result as string,
+                };
+                await dataService.addDocument(newDocument);
+                syncStateFromService();
+                setIsDocUploadModalOpen(false);
+            };
+            reader.readAsDataURL(file);
+        } catch (error: any) {
+            alert(error.message || 'Erro ao fazer upload do documento');
+        }
+    };
+    
+    const handleAddTeamMember = async (name: string) => {
+        try {
+            const newMember: ResponsibleUser = {
+                name: name as Responsible,
+                image: `https://i.pravatar.cc/150?u=${name.toLowerCase()}`
+            };
+            await dataService.addTeamMember(newMember);
+            syncStateFromService();
+        } catch (error: any) {
+            alert(error.message || 'Erro ao adicionar membro da equipe');
+        }
+    };
+
+    const handleDeadlineNotificationToggle = async () => {
+        try {
+            const newValue = !deadlineNotificationEnabled;
+            setDeadlineNotificationEnabled(newValue);
+            await dataService.saveSettings({ deadlineNotificationEnabled: newValue });
+        } catch (error: any) {
+            alert(error.message || 'Erro ao salvar configurações');
+        }
+    };
+    
+    const handleToggleIntegration = async (name: string) => {
+        try {
+            const updated = integrations.map(i => i.name === name ? {...i, connected: !i.connected} : i);
+            await dataService.setIntegrations(updated);
+            setIntegrations(updated);
+        } catch (error: any) {
+            alert(error.message || 'Erro ao alterar integração');
+        }
+    };
+
+    const handleSaveApiKey = async (name: string, apiKey: string) => {
+        try {
+            const updated = integrations.map(i => i.name === name ? {...i, apiKey} : i);
+            await dataService.setIntegrations(updated);
+            setIntegrations(updated);
+        } catch (error: any) {
+            alert(error.message || 'Erro ao salvar chave da API');
+        }
+    };
             
             if (error) {
                 setLoadingError(error);
