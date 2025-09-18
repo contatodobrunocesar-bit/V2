@@ -44,6 +44,11 @@ const ProfileSettingsCard: React.FC<Pick<SettingsProps, 'currentUser' | 'onUpdat
         onUpdateCurrentUser({ name });
         setIsEditing(false);
     };
+    
+    const handleCancel = () => {
+        setName(currentUser.name);
+        setIsEditing(false);
+    };
 
     return (
         <SettingsCard title="Meu Perfil" icon={<UserIcon className="w-5 h-5" />}>
@@ -78,7 +83,7 @@ const ProfileSettingsCard: React.FC<Pick<SettingsProps, 'currentUser' | 'onUpdat
                 {isEditing ? (
                     <div className="flex gap-2">
                         <button onClick={handleSave} className="p-2 text-green-600 hover:bg-green-100 rounded-full"><SaveIcon className="w-5 h-5" /></button>
-                        <button onClick={() => setIsEditing(false)} className="p-2 text-red-600 hover:bg-red-100 rounded-full"><XIcon className="w-5 h-5" /></button>
+                        <button onClick={handleCancel} className="p-2 text-red-600 hover:bg-red-100 rounded-full"><XIcon className="w-5 h-5" /></button>
                     </div>
                 ) : (
                     <button onClick={() => setIsEditing(true)} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-dark-accent rounded-full">

@@ -52,20 +52,20 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onEdit, responsib
     const diffDays = deadlineDate ? Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
     
     let deadlineStatus: { color: string, label: string } | null = null;
-    if (diffDays !== null) {
+    if (diffDays !== null && deadlineDate) {
         if (diffDays <= 0) {
             deadlineStatus = {
-                color: 'bg-red-500 text-red-800 dark:text-red-200',
+                color: 'bg-red-500',
                 label: 'Vencido',
             };
         } else if (diffDays <= 7) {
             deadlineStatus = {
-                color: 'bg-yellow-500 text-yellow-800 dark:text-yellow-200',
+                color: 'bg-yellow-500',
                 label: 'Próximo',
             };
         } else {
              deadlineStatus = {
-                color: 'bg-green-500 text-green-800 dark:text-green-200',
+                color: 'bg-green-500',
                 label: 'No prazo',
             };
         }
@@ -137,9 +137,9 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, onEdit, responsib
             
             {(deadlineStatus && diffDays !== null && businessDaysLeft !== null) && (
                 <div className="flex justify-between items-center text-xs">
-                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${deadlineStatus.color} bg-opacity-20`}>
+                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full bg-opacity-20`}>
                         <div className={`w-2 h-2 rounded-full ${deadlineStatus.color}`}></div>
-                        <span className="font-semibold">{deadlineStatus.label}</span>
+                        <span className={`font-semibold ${deadlineStatus.color === 'bg-red-500' ? 'text-red-800 dark:text-red-200' : deadlineStatus.color === 'bg-yellow-500' ? 'text-yellow-800 dark:text-yellow-200' : 'text-green-800 dark:text-green-200'}`}>{deadlineStatus.label}</span>
                     </div>
                     <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400 font-medium">
                         <ClockIcon className="w-4 h-4"/>

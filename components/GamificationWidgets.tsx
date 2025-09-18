@@ -30,12 +30,12 @@ const GamificationWidgets: React.FC<GamificationWidgetsProps> = ({ campaigns }) 
             if ([Status.Concluida, Status.AnaliseInterna, Status.Atrasada].includes(c.status_plano)) {
                 if(c.data_recebimento_relatorio && c.data_prevista_recebimento_relatorio) {
                     totalAnalyzed++;
-                    if (c.data_recebimento_relatorio <= c.data_prevista_recebimento_relatorio) {
+                    if (new Date(c.data_recebimento_relatorio) <= new Date(c.data_prevista_recebimento_relatorio)) {
                         analyzedOnTime++;
                     }
                 }
             }
-             if (c.periodo_fim && c.periodo_fim.getMonth() === currentMonth && c.periodo_fim.getFullYear() === currentYear) {
+             if (c.periodo_fim && new Date(c.periodo_fim).getMonth() === currentMonth && new Date(c.periodo_fim).getFullYear() === currentYear) {
                 totalThisMonth++;
                 if(c.status_plano === Status.Concluida) {
                     completedThisMonth++;

@@ -283,7 +283,12 @@ export const addTeamMember = async (member: ResponsibleUser) => {
   if (!currentUserId) return;
   
   try {
-    const newMember = await teamService.addTeamMember(member, currentUserId);
+    let newMember;
+    if (isSupabaseConfigured) {
+      newMember = await teamService.addTeamMember(member, currentUserId);
+    } else {
+      newMember = member;
+    }
     localState.teamMembers = [...localState.teamMembers, newMember];
   } catch (error) {
     console.error('Erro ao adicionar membro da equipe:', error);
@@ -308,7 +313,9 @@ export const updateCurrentUser = async (updatedData: Partial<Omit<User, 'email' 
   if (!currentUserId || !currentUser) return null;
   
   try {
-    await profileService.updateProfile(currentUserId, { ...currentUser, ...updatedData });
+    if (isSupabaseConfigured) {
+      await profileService.updateProfile(currentUserId, { ...currentUser, ...updatedData });
+    }
     currentUser = { ...currentUser, ...updatedData };
     return currentUser;
   } catch (error) {
@@ -326,7 +333,12 @@ export const addDocument = async (doc: Document) => {
   if (!currentUserId) return;
   
   try {
-    const newDoc = await documentService.addDocument(doc, currentUserId);
+    let newDoc;
+    if (isSupabaseConfigured) {
+      newDoc = await documentService.addDocument(doc, currentUserId);
+    } else {
+      newDoc = { ...doc, id: Date.now() };
+    }
     localState.documents = [newDoc, ...localState.documents];
   } catch (error) {
     console.error('Erro ao adicionar documento:', error);
@@ -338,7 +350,9 @@ export const saveSettings = async (settings: { deadlineNotificationEnabled: bool
   if (!currentUserId) return;
   
   try {
-    await settingsService.updateSettings(currentUserId, settings);
+    if (isSupabaseConfigured) {
+      await settingsService.updateSettings(currentUserId, settings);
+    }
     localState.settings = settings;
   } catch (error) {
     console.error('Erro ao salvar configurações:', error);
@@ -350,8 +364,10 @@ export const setIntegrations = async (integrations: Integration[]) => {
   if (!currentUserId) return;
   
   try {
-    for (const integration of integrations) {
-      await integrationService.upsertIntegration(integration, currentUserId);
+    if (isSupabaseConfigured) {
+      for (const integration of integrations) {
+        await integrationService.upsertIntegration(integration, currentUserId);
+      }
     }
     localState.integrations = integrations;
   } catch (error) {

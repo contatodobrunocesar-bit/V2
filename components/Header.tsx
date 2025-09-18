@@ -73,7 +73,9 @@ const Header: React.FC<HeaderProps> = ({
     };
 
     const formatTimeAgo = (date: Date) => {
-        const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+        const now = new Date();
+        const notificationDate = new Date(date);
+        const seconds = Math.floor((now.getTime() - notificationDate.getTime()) / 1000);
         let interval = seconds / 31536000;
         if (interval > 1) return `Há ${Math.floor(interval)} anos`;
         interval = seconds / 2592000;

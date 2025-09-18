@@ -14,7 +14,10 @@ const Teams: React.FC<TeamsProps> = ({ allCampaigns, teamMembers, onEditProfile 
             const memberCampaigns = allCampaigns.filter(c => c.atendimento_responsavel === responsibleUser.name);
             const activeCampaigns = memberCampaigns.filter(c => ![Status.Concluida, Status.Cancelada].includes(c.status_plano)).length;
             const campaignsWithReport = memberCampaigns.filter(c => c.relatorio_recebido);
-            const onTimeReports = campaignsWithReport.filter(c => c.data_recebimento_relatorio! <= c.data_prevista_recebimento_relatorio).length;
+            const onTimeReports = campaignsWithReport.filter(c => {
+                if (!c.data_recebimento_relatorio || !c.data_prevista_recebimento_relatorio) return false;
+                return new Date(c.data_recebimento_relatorio) <= new Date(c.data_prevista_recebimento_relatorio);
+            }).length;
             const punctuality = campaignsWithReport.length > 0 ? (onTimeReports / campaignsWithReport.length) * 100 : 100;
 
             return {

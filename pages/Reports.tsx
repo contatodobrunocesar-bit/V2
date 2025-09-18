@@ -89,7 +89,11 @@ const Reports: React.FC<ReportsProps> = ({ allCampaigns, uniqueClients }) => {
         const totalOrcamento = filteredCampaigns.reduce((sum, c) => sum + (c.orcamento || 0), 0);
         
         const reportsWithDeadline = filteredCampaigns.filter(c => c.relatorio_recebido && c.data_recebimento_relatorio && c.data_prevista_recebimento_relatorio);
-        const onTimeReports = reportsWithDeadline.filter(c => new Date(c.data_recebimento_relatorio!) <= new Date(c.data_prevista_recebimento_relatorio!)).length;
+        const onTimeReports = reportsWithDeadline.filter(c => {
+            const receivedDate = new Date(c.data_recebimento_relatorio!);
+            const expectedDate = new Date(c.data_prevista_recebimento_relatorio!);
+            return receivedDate <= expectedDate;
+        }).length;
         const punctualityRate = reportsWithDeadline.length > 0 ? (onTimeReports / reportsWithDeadline.length) * 100 : 0;
         
         const campaignsWithDuration = filteredCampaigns.filter(c => c.periodo_fim && c.periodo_inicio);

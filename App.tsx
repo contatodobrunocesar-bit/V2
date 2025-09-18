@@ -466,11 +466,12 @@ const App: React.FC = () => {
     };
 
     const handleUpdateCurrentUser = (updatedData: Partial<Omit<User, 'email' | 'role'>>) => {
-        const updatedUser = dataService.updateCurrentUser(updatedData);
-        if (updatedUser) {
-            setCurrentUser(updatedUser);
-            setUsers(dataService.getUsers());
-        }
+        dataService.updateCurrentUser(updatedData).then(updatedUser => {
+            if (updatedUser) {
+                setCurrentUser(updatedUser);
+                setUsers(dataService.getUsers());
+            }
+        });
     };
 
     const handleEditCurrentUserImage = () => {
