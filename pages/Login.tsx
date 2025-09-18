@@ -116,7 +116,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="w-full pl-10 p-3 border rounded-lg bg-gray-50 dark:bg-dark-accent dark:border-gray-600 focus:ring-primary focus:border-primary text-gray-900 dark:text-white"
-                                    placeholder="Sua senha"
+                                    placeholder="Gov@2025+"
                                 />
                                 <button
                                     type="button"

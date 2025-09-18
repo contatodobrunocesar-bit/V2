@@ -141,19 +141,20 @@ export const login = async (email: string, password?: string): Promise<User | nu
       return MOCK_CURRENT_USER;
     }
 
-    // Para compatibilidade com o sistema anterior, se não há senha, fazer signup automático
+    // Usar senha padrão se não fornecida
+    const loginPassword = password || 'Gov@2025+';
+    
     let authResult;
-    if (password) {
-      authResult = await authService.signIn(email, password);
-    } else {
-      // Tentar login primeiro, se falhar, fazer signup
-      authResult = await authService.signIn(email, 'defaultpassword123');
+    
+    // Tentar login primeiro
+    authResult = await authService.signIn(email, loginPassword);
+    
+    // Se falhar e for a senha padrão, tentar criar conta
+    if (authResult.error && loginPassword === 'Gov@2025+') {
+      const name = email.split('@')[0].replace(/[.-]/g, ' ');
+      authResult = await authService.signUp(email, loginPassword, name);
       if (authResult.error) {
-        const name = email.split('@')[0];
-        authResult = await authService.signUp(email, 'defaultpassword123', name);
-        if (authResult.error) {
-          throw new Error('Erro ao criar conta');
-        }
+        throw new Error('Erro ao fazer login ou criar conta: ' + authResult.error.message);
       }
     }
 
