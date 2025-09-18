@@ -47,7 +47,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
     };
     
     return (
-        <div className="flex min-h-screen bg-white dark:bg-dark-bg">
+        <div className="flex min-h-screen bg-black">
             {/* Left Panel */}
             <div className="hidden lg:flex w-1/2 items-center justify-center bg-gradient-to-br from-primary via-secondary to-purple-700 p-12 text-white relative overflow-hidden">
                 {/* Overlay */}
@@ -61,9 +61,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
             </div>
 
             {/* Right Panel - Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-black">
                 <div className="w-full max-w-md">
-                    <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+                    <h2 className="text-3xl font-bold mb-8 text-white">
                         {isSignUp ? 'Criar Conta' : 'Bem-vindo(a) de volta!'}
                     </h2>
 
@@ -80,7 +80,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                                     required={isSignUp}
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-dark-accent dark:border-gray-600 focus:ring-primary focus:border-primary text-gray-900 dark:text-white"
+                                    className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 focus:ring-primary focus:border-primary text-white"
                                     placeholder="Seu nome completo"
                                 />
                             </div>
@@ -102,7 +102,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-10 p-3 border rounded-lg bg-gray-50 dark:bg-dark-accent dark:border-gray-600 focus:ring-primary focus:border-primary text-gray-900 dark:text-white"
+                                    className="w-full pl-10 p-3 border border-gray-600 rounded-lg bg-gray-800 focus:ring-primary focus:border-primary text-white"
                                     placeholder="seuemail@secom.rs.gov.br"
                                 />
                             </div>
@@ -124,7 +124,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-10 p-3 border rounded-lg bg-gray-50 dark:bg-dark-accent dark:border-gray-600 focus:ring-primary focus:border-primary text-gray-900 dark:text-white"
+                                    className="w-full pl-10 p-3 border border-gray-600 rounded-lg bg-gray-800 focus:ring-primary focus:border-primary text-white"
                                     placeholder="Digite sua senha"
                                 />
                                 <button
@@ -138,7 +138,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                         </div>
 
                         {error && (
-                            <div className="bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg text-sm">
+                            <div className="bg-red-900/50 border border-red-600 text-red-300 px-4 py-3 rounded-lg text-sm">
                                 {error}
                             </div>
                         )}
@@ -147,7 +147,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:bg-gray-400 dark:disabled:bg-gray-600"
+                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:bg-gray-600"
                             >
                                 {isLoading ? (
                                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
