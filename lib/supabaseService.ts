@@ -180,7 +180,7 @@ export const campaignService = {
     const { error } = await supabase
       .from('campaigns')
       .delete()
-      .eq('id', campaignId)
+      .eq('id', campaignId);
 
     if (error) throw error;
   },
@@ -192,8 +192,7 @@ export const campaignService = {
         { 
           event: '*', 
           schema: 'public', 
-          table: 'campaigns',
-          filter: `user_id=eq.${userId}`
+          table: 'campaigns'
         }, 
         async () => {
           const campaigns = await this.getCampaigns(userId);
@@ -326,7 +325,7 @@ export const notificationService = {
     const { error } = await supabase
       .from('notifications')
       .update({ read: true })
-      .in('id', notificationIds)
+      .in('id', notificationIds);
 
     if (error) throw error;
   }
@@ -338,6 +337,7 @@ export const settingsService = {
     const { data, error } = await supabase
       .from('user_settings')
       .select('*')
+      .eq('user_id', userId)
       .limit(1)
       .single();
 
@@ -374,6 +374,7 @@ export const integrationService = {
     const { data, error } = await supabase
       .from('integrations')
       .select('*')
+      .eq('user_id', userId);
 
     if (error || !data) return [];
     return data.map(row => ({
