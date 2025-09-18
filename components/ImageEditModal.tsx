@@ -48,6 +48,12 @@ const ImageEditModal: React.FC<ImageEditModalProps> = ({ isOpen, onClose, imageU
     const handleGenerate = async () => {
         if (!prompt || !imageUrl) return;
 
+        const apiKey = process.env.API_KEY as string;
+        if (!apiKey || apiKey === 'your_api_key_here' || apiKey.trim() === '') {
+            setError("Chave da API do Gemini não configurada. Esta funcionalidade não está disponível.");
+            return;
+        }
+
         setIsLoading(true);
         setEditedImage(null);
         setError(null);

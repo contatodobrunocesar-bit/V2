@@ -37,6 +37,13 @@ const getAi = () => {
 // --- Cloud (Gemini) Storage Functions ---
 
 const loadStateFromGemini = async (): Promise<AppState | null> => {
+    // Check if API key is available and valid
+    const apiKey = process.env.API_KEY as string;
+    if (!apiKey || apiKey === 'your_api_key_here' || apiKey.trim() === '') {
+        console.log("Gemini API key not configured. Using local storage only.");
+        return null;
+    }
+
     let rawResponseText = ''; // For improved debugging
     try {
         const genai = getAi();
@@ -73,6 +80,13 @@ const loadStateFromGemini = async (): Promise<AppState | null> => {
 };
 
 const saveStateToGemini = async (stateToSave: AppState): Promise<void> => {
+    // Check if API key is available and valid
+    const apiKey = process.env.API_KEY as string;
+    if (!apiKey || apiKey === 'your_api_key_here' || apiKey.trim() === '') {
+        console.log("Gemini API key not configured. Skipping cloud sync.");
+        return;
+    }
+
     try {
         const genai = getAi();
         const stateJson = JSON.stringify(stateToSave);
