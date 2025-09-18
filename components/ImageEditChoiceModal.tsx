@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import Modal from './Modal';
 import { ZapIcon, UploadIcon } from './Icons';
-import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '../constants';
 
 interface ImageEditChoiceModalProps {
     isOpen: boolean;
@@ -19,27 +18,18 @@ const ImageEditChoiceModal: React.FC<ImageEditChoiceModalProps> = ({
     onSave,
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [error, setError] = useState<string>('');
 
     const handleCloseAndReset = () => {
-        setError('');
         onClose();
     };
 
     const handleUploadClick = () => {
-        setError('');
         fileInputRef.current?.click();
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
-
-        if (file.size > MAX_FILE_SIZE_BYTES) {
-            setError(`O arquivo é muito grande. O tamanho máximo é de ${MAX_FILE_SIZE_MB}MB.`);
-            event.target.value = ''; // Reset file input
-            return;
-        }
 
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -58,7 +48,7 @@ const ImageEditChoiceModal: React.FC<ImageEditChoiceModalProps> = ({
                         type="file"
                         ref={fileInputRef}
                         onChange={handleFileChange}
-                        accept="image/png, image/jpeg, image/webp"
+                        accept="*/*"
                         style={{ display: 'none' }}
                     />
                     <button
@@ -76,11 +66,6 @@ const ImageEditChoiceModal: React.FC<ImageEditChoiceModalProps> = ({
                         <span className="font-semibold">Fazer Upload</span>
                     </button>
                 </div>
-                 {error && (
-                    <div className="mt-4 text-center text-red-500 text-sm font-semibold p-2 bg-red-100 dark:bg-red-900/50 rounded-md">
-                        {error}
-                    </div>
-                )}
             </div>
         </Modal>
     );

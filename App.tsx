@@ -14,7 +14,6 @@ import ImageEditModal from './components/ImageEditModal';
 import ImageEditChoiceModal from './components/ImageEditChoiceModal';
 import Login from './pages/Login';
 import Teams from './pages/Teams';
-import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from './constants';
 
 const formatValueForLog = (value: any): string => {
     if (value instanceof Date) {
@@ -104,29 +103,17 @@ const DocumentUploadForm: React.FC<{
 }> = ({ campaigns, onSubmit, onCancel }) => {
     const [file, setFile] = useState<File | null>(null);
     const [campaignId, setCampaignId] = useState<string>('');
-    const [fileError, setFileError] = useState<string>('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (file && campaignId && !fileError) {
+        if (file && campaignId) {
             onSubmit(file, campaignId);
         }
     };
     
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0] || null;
-        setFileError('');
-        if (selectedFile) {
-            if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
-                setFileError(`O arquivo é muito grande. O tamanho máximo é de ${MAX_FILE_SIZE_MB}MB.`);
-                setFile(null);
-                e.target.value = ''; // Clear the input
-            } else {
-                setFile(selectedFile);
-            }
-        } else {
-            setFile(null);
-        }
+        setFile(selectedFile);
     };
 
 
@@ -146,7 +133,6 @@ const DocumentUploadForm: React.FC<{
                     required 
                     className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                 />
-                {fileError && <p className="text-red-500 text-sm mt-1">{fileError}</p>}
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Associar à campanha</label>
@@ -159,7 +145,7 @@ const DocumentUploadForm: React.FC<{
                 <button type="button" onClick={onCancel} className="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">
                     Cancelar
                 </button>
-                <button type="submit" className="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50" disabled={!!fileError || !file}>
+                <button type="submit" className="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50" disabled={!file}>
                     Salvar documento
                 </button>
             </div>
