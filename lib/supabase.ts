@@ -33,7 +33,7 @@ export const supabase = isSupabaseConfigured ? (() => {
     console.warn('Erro ao criar cliente Supabase:', error);
     return null;
     }
-  }
+  })() : null;
 
 // Mock client for offline mode
 export const createMockSupabaseClient = () => ({
