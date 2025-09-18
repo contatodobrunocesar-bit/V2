@@ -425,7 +425,6 @@ const App: React.FC = () => {
     
     const [isDocUploadModalOpen, setIsDocUploadModalOpen] = useState(false);
     const [aiEditingImageConfig, setAiEditingImageConfig] = useState<{ imageUrl: string; onSave: (newImageUrl: string) => void; title: string } | null>(null);
-    const [uploadChoiceConfig, setUploadChoiceConfig] = useState<{ onSave: (newImageUrl: string) => void; currentImageUrl: string; title: string } | null>(null);
 
     const uniqueClients = useMemo(() => {
         const clients = campaigns.map(c => c.cliente);
@@ -545,32 +544,48 @@ const App: React.FC = () => {
 
     const handleEditCurrentUserImage = () => {
         if (currentUser) {
-            setUploadChoiceConfig({
-                title: `Alterar sua foto de perfil`,
-                currentImageUrl: currentUser.image,
-                onSave: (newImageUrl: string) => {
-                    handleUpdateCurrentUser({ image: newImageUrl });
-                    setUploadChoiceConfig(null);
+            // Criar input de arquivo diretamente
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64String = reader.result as string;
+                        handleUpdateCurrentUser({ image: base64String });
+                    };
+                    reader.readAsDataURL(file);
                 }
-            });
+            };
+            input.click();
         }
     };
     
     const handleEditTeamMemberImage = (memberName: string) => {
         const member = teamMembers.find(m => m.name === memberName);
         if (member) {
-            setUploadChoiceConfig({
-                title: `Alterar foto de ${memberName}`,
-                currentImageUrl: member.image,
-                onSave: (newImageUrl) => {
-                    const updatedMembers = teamMembers.map(m =>
-                        m.name === memberName ? { ...m, image: newImageUrl } : m
-                    );
-                    dataService.setTeamMembers(updatedMembers);
-                    setTeamMembers(updatedMembers);
-                    setUploadChoiceConfig(null);
+            // Criar input de arquivo diretamente
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64String = reader.result as string;
+                        const updatedMembers = teamMembers.map(m =>
+                            m.name === memberName ? { ...m, image: base64String } : m
+                        );
+                        dataService.setTeamMembers(updatedMembers);
+                        setTeamMembers(updatedMembers);
+                    };
+                    reader.readAsDataURL(file);
                 }
-            });
+            };
+            input.click();
         }
     };
     
@@ -742,24 +757,6 @@ const App: React.FC = () => {
                 />
             )}
             
-            {uploadChoiceConfig && (
-                <ImageEditChoiceModal
-                    isOpen={!!uploadChoiceConfig}
-                    onClose={() => setUploadChoiceConfig(null)}
-                    title={uploadChoiceConfig.title}
-                    onSave={uploadChoiceConfig.onSave}
-                    onEditWithAI={() => {
-                        if (uploadChoiceConfig) {
-                             setAiEditingImageConfig({
-                                imageUrl: uploadChoiceConfig.currentImageUrl,
-                                onSave: uploadChoiceConfig.onSave,
-                                title: uploadChoiceConfig.title
-                            });
-                        }
-                        setUploadChoiceConfig(null);
-                    }}
-                />
-            )}
 
             {/* Floating Action Buttons */}
             {activeView === 'Dashboard' && (
