@@ -117,10 +117,13 @@ export const profileService = {
 
     if (error || !data) return null;
 
+    // Definir bruno-silva@secom.rs.gov.br como administrador
+    const role = data.email === 'bruno-silva@secom.rs.gov.br' ? UserRole.Admin : data.role as UserRole;
+
     return {
       name: data.name,
       email: data.email,
-      role: data.role as UserRole,
+      role: role,
       image: data.image || `https://i.pravatar.cc/150?u=${data.email}`
     };
   },
