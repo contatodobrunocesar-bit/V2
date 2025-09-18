@@ -149,15 +149,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                             </button>
                         </div>
 
-                        <div className="text-center">
-                            <button
-                                type="button"
-                                onClick={() => setIsSignUp(!isSignUp)}
-                                className="text-sm text-primary hover:text-red-700 font-medium"
-                            >
-                                {isSignUp ? "Já tem uma conta? Faça login" : "Não tem uma conta? Cadastre-se"}
-                            </button>
-                        </div>
                     </form>
                 </div>
             </div>
