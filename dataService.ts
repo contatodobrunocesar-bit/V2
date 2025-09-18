@@ -90,9 +90,19 @@ const loadUserData = async (userId: string, initialIntegrations: Integration[]) 
       integrationService.getIntegrations(userId)
     ]);
 
+    // Se não há membros da equipe no Supabase, usar os padrão
+    const finalTeamMembers = teamMembers.length > 0 ? teamMembers : [
+      { name: 'Jéssica', image: 'https://i.pravatar.cc/150?u=jessica' },
+      { name: 'Bruno', image: 'https://i.pravatar.cc/150?u=bruno' },
+      { name: 'Fernanda', image: 'https://i.pravatar.cc/150?u=fernanda' },
+      { name: 'Adriana', image: 'https://i.pravatar.cc/150?u=adriana' },
+      { name: 'Jamile', image: 'https://i.pravatar.cc/150?u=jamile' },
+      { name: 'Natacha', image: 'https://i.pravatar.cc/150?u=natacha' },
+    ];
+
     localState = {
       campaigns,
-      teamMembers,
+      teamMembers: finalTeamMembers,
       documents,
       notifications,
       settings,
@@ -101,7 +111,7 @@ const loadUserData = async (userId: string, initialIntegrations: Integration[]) 
 
     console.log('✅ Dados carregados:', {
       campaigns: campaigns.length,
-      teamMembers: teamMembers.length,
+      teamMembers: finalTeamMembers.length,
       documents: documents.length
     });
 
