@@ -102,11 +102,11 @@ const DocumentUploadForm: React.FC<{
     onCancel: () => void;
 }> = ({ campaigns, onSubmit, onCancel }) => {
     const [file, setFile] = useState<File | null>(null);
-    const [campaignId, setCampaignId] = useState<string>('');
+    const [campaignId, setCampaignId] = useState<string>('none');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (file && campaignId) {
+        if (file) {
             onSubmit(file, campaignId);
         }
     };
@@ -115,13 +115,6 @@ const DocumentUploadForm: React.FC<{
         const selectedFile = e.target.files?.[0] || null;
         setFile(selectedFile);
     };
-
-
-    useEffect(() => {
-        if (campaigns.length > 0 && !campaignId) {
-            setCampaignId(campaigns[0].id);
-        }
-    }, [campaigns, campaignId]);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -136,8 +129,8 @@ const DocumentUploadForm: React.FC<{
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Associar à campanha</label>
-                <select value={campaignId} onChange={(e) => setCampaignId(e.target.value)} required className="w-full p-2 border rounded-md bg-gray-50 dark:bg-dark-accent dark:border-gray-600">
-                    <option value="" disabled>Selecione uma campanha</option>
+                <select value={campaignId} onChange={(e) => setCampaignId(e.target.value)} className="w-full p-2 border rounded-md bg-gray-50 dark:bg-dark-accent dark:border-gray-600">
+                    <option value="none">Documento geral (sem campanha específica)</option>
                     {campaigns.map(c => <option key={c.id} value={c.id}>{c.cliente || 'Cliente não definido'} - {c.campanha}</option>)}
                 </select>
             </div>
@@ -492,8 +485,7 @@ const App: React.FC = () => {
     };
 
     const handleDocUpload = (file: File, campaignId: string) => {
-        const campaign = campaigns.find(c => c.id === campaignId);
-        if(!campaign) return;
+        const campaign = campaignId !== 'none' ? campaigns.find(c => c.id === campaignId) : null;
 
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -501,8 +493,8 @@ const App: React.FC = () => {
                 id: Date.now(),
                 name: file.name,
                 type: file.name.endsWith('.pdf') ? DocumentType.PDF : (file.name.endsWith('.docx') ? DocumentType.Word : DocumentType.Image),
-                campaignId: campaign.id,
-                campaignName: campaign.campanha,
+                campaignId: campaign ? campaign.id : '',
+                campaignName: campaign ? campaign.campanha : 'Documento Geral',
                 uploadedAt: new Date().toISOString(),
                 url: reader.result as string,
             };
