@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User } from '../types';
 import { MailIcon, LockIcon, EyeIcon, EyeOffIcon } from '../components/Icons';
+import { authService } from '../lib/supabaseService';
 
 interface LoginProps {
     onLogin: (user: User) => void;
@@ -13,19 +14,24 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [isSignUp, setIsSignUp] = useState(false);
+    const [name, setName] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
 
-        // Mock authentication
         setTimeout(() => {
-            const foundUser = users.find(user => user.email === email);
-            // In a real app, you would also check the password against a hashed version.
-            // For this mock, we'll just check if the user exists.
-            if (foundUser) {
-                onLogin(foundUser);
+            // Para compatibilidade, usar o sistema de login existente
+            if (email && password) {
+                const mockUser: User = {
+                    name: name || email.split('@')[0],
+                    email,
+                    role: 'Analista' as any,
+                    image: `https://i.pravatar.cc/150?u=${email}`
+                };
+                onLogin(mockUser);
             } else {
                 setError('E-mail ou senha inválidos. Tente novamente.');
             }
@@ -52,6 +58,24 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                     <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Bem-vindo(a) de volta!</h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {isSignUp && (
+                            <div>
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Nome completo
+                                </label>
+                                <input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    required={isSignUp}
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-dark-accent dark:border-gray-600 focus:ring-primary focus:border-primary text-gray-900 dark:text-white"
+                                    placeholder="Seu nome completo"
+                                />
+                            </div>
+                        )}
+
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 E-mail
@@ -120,7 +144,17 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                ) : "Entrar"}
+                                ) : (isSignUp ? "Criar Conta" : "Entrar")}
+                            </button>
+                        </div>
+
+                        <div className="text-center">
+                            <button
+                                type="button"
+                                onClick={() => setIsSignUp(!isSignUp)}
+                                className="text-sm text-primary hover:text-red-700 font-medium"
+                            >
+                                {isSignUp ? "Já tem uma conta? Faça login" : "Não tem uma conta? Cadastre-se"}
                             </button>
                         </div>
                     </form>
