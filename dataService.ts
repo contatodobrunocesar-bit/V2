@@ -41,7 +41,8 @@ export const initializeData = async (
   try {
     // Se Supabase não está configurado, usar modo offline
     if (!isSupabaseConfigured) {
-      console.warn('Supabase não configurado - executando em modo offline');
+      console.warn('⚠️ SUPABASE NÃO CONFIGURADO - Executando em modo offline');
+      console.warn('📝 Para dados compartilhados, configure as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY');
       currentUser = MOCK_CURRENT_USER;
       currentUserId = 'offline-user';
       localState.teamMembers = MOCK_RESPONSIBLES;
@@ -147,7 +148,7 @@ export const login = async (email: string, password?: string): Promise<User | nu
     
     // Se Supabase não está configurado ou não funciona, usar modo offline
     if (!isSupabaseConfigured) {
-      console.warn('Supabase não configurado - login offline');
+      console.warn('⚠️ MODO OFFLINE - Dados não serão compartilhados entre usuários');
       // Criar usuário baseado no e-mail fornecido
       const name = email.split('@')[0].replace(/[.-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       currentUser = {
