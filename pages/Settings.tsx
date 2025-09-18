@@ -409,7 +409,7 @@ const Settings: React.FC<SettingsProps> = (props) => {
     return (
         <div className="space-y-6">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Configurações</h1>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div className="space-y-6">
                     <ProfileSettingsCard {...props} />
                     <UserAccessCard {...props} />
@@ -417,8 +417,6 @@ const Settings: React.FC<SettingsProps> = (props) => {
                 <div className="space-y-6">
                     <TeamManagementCard {...props} />
                     <NotificationSettingsCard {...props} />
-                    <IntegrationSettingsCard {...props} />
-                    <DataManagementCard syncStatus={props.syncStatus} />
                 </div>
             </div>
         </div>
