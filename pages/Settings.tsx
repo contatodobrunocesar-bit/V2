@@ -50,10 +50,10 @@ const ProfileSettingsCard: React.FC<Pick<SettingsProps, 'currentUser' | 'onUpdat
             <div className="flex items-center gap-4">
                 <div className="relative group w-16 h-16 flex-shrink-0">
                     <img src={currentUser.image} alt={currentUser.name} className="w-16 h-16 rounded-full object-cover" />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
+                    <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
                         <button
                             onClick={onEditCurrentUserImage}
-                            className="p-2 bg-white/90 rounded-full text-primary hover:bg-white transition-colors"
+                            className="p-2 bg-black/70 rounded-full text-white hover:bg-black/80 transition-colors"
                             aria-label={`Editar sua foto de perfil`}
                         >
                             <PencilIcon className="w-5 h-5"/>
