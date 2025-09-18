@@ -407,22 +407,6 @@ const App: React.FC = () => {
             alert(error.message || 'Erro ao salvar chave da API');
         }
     };
-            
-            if (error) {
-                setLoadingError(error);
-                setIsLoading(false);
-                return;
-            }
-
-            syncStateFromService();
-            if (userFromSession) {
-                setIsAuthenticated(true);
-            }
-            setIsLoading(false);
-        };
-        initializeApp();
-    }, [initialIntegrations, syncStateFromService, skipLogin]);
-
 
     const [filters, setFilters] = useState<Filters>({
         agencia: '',
