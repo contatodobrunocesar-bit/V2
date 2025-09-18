@@ -489,92 +489,6 @@ const App: React.FC = () => {
                         
                         // Só mostrar notificação se for exatamente o dia do prazo
                         if (deadlineDate.getTime() === today.getTime()) {
-                            const notifId = `${c.id}-${d.date.toISOString().split('T')[0]}`;
-                            // Prevent duplicate notifications
-                            if (!notifications.some(n => n.id === notifId)) {
-                                 newNotifications.push({
-                                    id: notifId,
-                                    campaignId: c.id,
-                                    campaignName: c.campanha,
-                                    message: `HOJE é o prazo de ${d.message.includes('retorno') ? 'retorno para a agência' : 'recebimento do relatório'} da campanha ${c.campanha}.`,
-                                    timestamp: new Date(),
-                                    read: false
-                                });
-                            }
-                        }
-                    }
-                })
-            });
-            if (newNotifications.length > 0) {
-                setNotifications(prev => [...newNotifications, ...prev]);
-            }
-        };
-
-        const intervalId = setInterval(checkDeadlines, 1000 * 60 * 60 * 6); // Check every 6 hours
-        checkDeadlines(); // Check immediately on load
-
-        return () => clearInterval(intervalId);
-    }, [campaigns, notifications, deadlineNotificationEnabled]);
-
-    const filteredCampaigns = useMemo(() => {
-        return campaigns.filter(c => {
-            const { agencia, atendimento_responsavel, periodo_inicio, periodo_fim, status_plano, cliente, presenca_em, regioes_funcionais } = filters;
-            return (
-                (agencia === '' || c.agencia === agencia) &&
-                (atendimento_responsavel === '' || c.atendimento_responsavel === atendimento_responsavel) &&
-                (cliente === '' || c.cliente === cliente) &&
-                (periodo_inicio === '' || (c.periodo_inicio && new Date(c.periodo_inicio) >= new Date(periodo_inicio))) &&
-                (periodo_fim === '' || (c.periodo_fim && new Date(c.periodo_fim) <= new Date(periodo_fim))) &&
-                (status_plano.length === 0 || status_plano.includes(c.status_plano)) &&
-                (presenca_em.length === 0 || (c.presenca_em && c.presenca_em.some(p => presenca_em.includes(p)))) &&
-                (regioes_funcionais.length === 0 || (c.regioes_funcionais && c.regioes_funcionais.some(r => regioes_funcionais.includes(r))))
-            );
-        });
-    }, [campaigns, filters]);
-
-    const handleSaveCampaign = (campaignData: Omit<Campaign, 'id' | 'created_at' | 'updated_at'>) => {
-        if (!currentUser) {
-            alert("Erro: usuário não autenticado.");
-            return;
-        }
-
-        if (editingCampaign) {
-            const changes = generateChangeLog(editingCampaign, campaignData, currentUser);
-            const historyEntry: HistoryEntry = {
-                user: currentUser.name,
-                timestamp: new Date(),
-                changes: changes.length > 0 ? changes : ['Nenhuma alteração de campo detectada, apenas salvamento.'],
-            };
-            
-            const updatedCampaign: Campaign = {
-                ...editingCampaign,
-                ...campaignData,
-                updated_at: new Date(),
-                history: [...(editingCampaign.history || []), historyEntry],
-            };
-            dataService.updateCampaign(updatedCampaign);
-        } else {
-            const newCampaign: Campaign = {
-                id: `uuid-${Date.now()}-${Math.random()}`,
-                ...campaignData,
-                created_at: new Date(),
-                updated_at: new Date(),
-                history: [{ user: currentUser.name, timestamp: new Date(), changes: ['Projeto criado.'] }]
-            };
-            dataService.addCampaign(newCampaign);
-        }
-        setCampaigns(dataService.getCampaigns());
-        setIsModalOpen(false);
-        setEditingCampaign(undefined);
-    };
-    
-    const handleDeleteCampaign = (campaignId: string) => {
-        dataService.deleteCampaign(campaignId);
-        setCampaigns(dataService.getCampaigns());
-        setIsModalOpen(false);
-        setEditingCampaign(undefined);
-    };
-
     const handleNewCampaign = () => {
         setEditingCampaign(undefined);
         setIsModalOpen(true);
@@ -593,51 +507,6 @@ const App: React.FC = () => {
         });
         setIsFilterPanelOpen(false);
     };
-    
-    const handleCampaignStatusChange = (campaignId: string, newStatus: Status) => {
-        const campaignToUpdate = campaigns.find(c => c.id === campaignId);
-        if (campaignToUpdate && currentUser) {
-            const originalStatus = campaignToUpdate.status_plano;
-            const updatedCampaign: Campaign = {
-                ...campaignToUpdate,
-                status_plano: newStatus,
-                updated_at: new Date(),
-                history: [
-                    ...(campaignToUpdate.history || []),
-                    {
-                        user: currentUser.name,
-                        timestamp: new Date(),
-                        changes: [`Status alterado de "${originalStatus}" para "${newStatus}" via arrastar e soltar.`],
-                    },
-                ],
-            };
-            dataService.updateCampaign(updatedCampaign);
-            setCampaigns(dataService.getCampaigns());
-        }
-    };
-    
-    const handleLogin = (user: User) => {
-        const loggedInUser = dataService.login(user.email);
-        if (loggedInUser) {
-            syncStateFromService();
-            setIsAuthenticated(true);
-        }
-    };
-
-    const handleLogout = () => {
-        dataService.logout();
-        setCurrentUser(null);
-        setIsAuthenticated(false);
-    };
-
-    const handleUpdateCurrentUser = (updatedData: Partial<Omit<User, 'email' | 'role'>>) => {
-        dataService.updateCurrentUser(updatedData).then(updatedUser => {
-            if (updatedUser) {
-                setCurrentUser(updatedUser);
-                setUsers(dataService.getUsers());
-            }
-        });
-    };
 
     const handleEditCurrentUserImage = () => {
         if (currentUser) {
@@ -650,27 +519,6 @@ const App: React.FC = () => {
                 }
             });
         }
-    };
-
-    const handleDocUpload = (file: File, campaignId: string) => {
-        const campaign = campaignId !== 'none' ? campaigns.find(c => c.id === campaignId) : null;
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const newDocument: Document = {
-                id: Date.now(),
-                name: file.name,
-                type: file.name.endsWith('.pdf') ? DocumentType.PDF : (file.name.endsWith('.docx') ? DocumentType.Word : DocumentType.Image),
-                campaignId: campaign ? campaign.id : '',
-                campaignName: campaign ? campaign.campanha : 'Documento Geral',
-                uploadedAt: new Date().toISOString(),
-                url: reader.result as string,
-            };
-            dataService.addDocument(newDocument);
-            setDocuments(dataService.getDocuments());
-            setIsDocUploadModalOpen(false);
-        };
-        reader.readAsDataURL(file);
     };
     
     const handleEditTeamMemberImage = (memberName: string) => {
@@ -689,15 +537,6 @@ const App: React.FC = () => {
                 }
             });
         }
-    };
-    
-    const handleAddTeamMember = (name: string) => {
-        const newMember: ResponsibleUser = {
-            name: name as Responsible,
-            image: `https://i.pravatar.cc/150?u=${name.toLowerCase()}`
-        };
-        dataService.addTeamMember(newMember);
-        setTeamMembers(dataService.getTeamMembers());
     };
     
     const handleAddUser = (newUser: Omit<User, 'image'>) => {
@@ -736,25 +575,6 @@ const App: React.FC = () => {
             });
         }
     };
-    
-    const handleDeadlineNotificationToggle = () => {
-        const newValue = !deadlineNotificationEnabled;
-        setDeadlineNotificationEnabled(newValue);
-        dataService.saveSettings({ deadlineNotificationEnabled: newValue });
-    };
-    
-    const handleToggleIntegration = (name: string) => {
-        const updated = integrations.map(i => i.name === name ? {...i, connected: !i.connected} : i);
-        dataService.setIntegrations(updated);
-        setIntegrations(updated);
-    };
-
-    const handleSaveApiKey = (name: string, apiKey: string) => {
-        const updated = integrations.map(i => i.name === name ? {...i, apiKey} : i);
-        dataService.setIntegrations(updated);
-        setIntegrations(updated);
-    };
-
 
     const unreadNotificationCount = notifications.filter(n => !n.read).length;
 
