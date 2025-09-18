@@ -158,7 +158,7 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
                 <div className="relative" ref={profileRef}>
                     <div className="flex items-center space-x-3 cursor-pointer" onClick={handleProfileClick}>
-                        <img src={user.image} alt={user.name} className="w-12 h-12 rounded-full object-cover" />
+                        <img src={user.image} alt={user.name} className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600" />
                         <div className="hidden md:block">
                             <p className="font-semibold text-sm">{user.name}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>

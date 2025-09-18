@@ -48,10 +48,10 @@ const Teams: React.FC<TeamsProps> = ({ allCampaigns, teamMembers, onEditProfile 
                                 alt={member.name}
                                 className="w-24 h-24 rounded-full object-cover border-4 border-primary/50"
                             />
-                            <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
                                 <button 
                                     onClick={() => onEditProfile(member.name as Responsible)} 
-                                    className="p-2 bg-white/80 rounded-full text-primary hover:bg-white"
+                                    className="p-2 bg-white/90 rounded-full text-primary hover:bg-white transition-colors"
                                     aria-label={`Editar foto de ${member.name}`}
                                 >
                                     <PencilIcon className="w-5 h-5"/>

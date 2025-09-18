@@ -50,10 +50,10 @@ const ProfileSettingsCard: React.FC<Pick<SettingsProps, 'currentUser' | 'onUpdat
             <div className="flex items-center gap-4">
                 <div className="relative group w-16 h-16 flex-shrink-0">
                     <img src={currentUser.image} alt={currentUser.name} className="w-16 h-16 rounded-full object-cover" />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
                         <button
                             onClick={onEditCurrentUserImage}
-                            className="p-2 bg-white/80 rounded-full text-primary hover:bg-white"
+                            className="p-2 bg-white/90 rounded-full text-primary hover:bg-white transition-colors"
                             aria-label={`Editar sua foto de perfil`}
                         >
                             <PencilIcon className="w-5 h-5"/>
@@ -109,7 +109,7 @@ const TeamManagementCard: React.FC<Pick<SettingsProps, 'teamMembers' | 'onEditTe
                             <img src={member.image} alt={member.name} className="w-10 h-10 rounded-full object-cover" />
                             <span className="font-semibold">{member.name}</span>
                         </div>
-                        <button onClick={() => onEditTeamMemberImage(member.name)} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-dark-accent rounded-full">
+                        <button onClick={() => onEditTeamMemberImage(member.name)} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-dark-accent rounded-full transition-colors">
                             <PencilIcon className="w-5 h-5" />
                         </button>
                     </div>
