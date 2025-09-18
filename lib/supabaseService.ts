@@ -1,5 +1,7 @@
-import { supabase } from './supabase';
+import { getSupabaseClient, isSupabaseConfigured } from './supabase';
 import { Campaign, ResponsibleUser, User, Document, Integration, Notification, UserRole } from '../types';
+
+const supabase = getSupabaseClient();
 
 // Conversores de tipos
 const convertSupabaseCampaign = (row: any): Campaign => ({

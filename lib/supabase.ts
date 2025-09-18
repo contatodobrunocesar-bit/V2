@@ -4,11 +4,13 @@ import { Database } from './database.types';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Variáveis de ambiente do Supabase não configuradas. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no arquivo .env.local');
-}
+// Check if Supabase is properly configured
+export const isSupabaseConfigured = supabaseUrl && 
+  supabaseAnonKey && 
+  supabaseUrl !== 'https://your-project.supabase.co' && 
+  supabaseAnonKey !== 'your-anon-key';
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = isSupabaseConfigured ? createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
@@ -17,6 +19,38 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   realtime: {
     params: {
       eventsPerSecond: 10
+    }
+  }
+}) : null;
+
+// Mock client for offline mode
+export const createMockSupabaseClient = () => ({
+  auth: {
+    signUp: async () => ({ data: null, error: { message: 'Supabase não configurado - usando modo offline' } }),
+    signInWithPassword: async () => ({ data: null, error: { message: 'Supabase não configurado - usando modo offline' } }),
+    signOut: async () => ({ error: null }),
+    getUser: async () => ({ data: { user: null } }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
+  },
+  from: () => ({
+    select: () => ({ eq: () => ({ single: async () => ({ data: null, error: { message: 'Offline mode' } }) }) }),
+    insert: () => ({ select: () => ({ single: async () => ({ data: null, error: { message: 'Offline mode' } }) }) }),
+    update: () => ({ eq: () => ({ select: () => ({ single: async () => ({ data: null, error: { message: 'Offline mode' } }) }) }) }),
+    delete: () => ({ eq: () => ({ error: { message: 'Offline mode' } }) }),
+    order: () => ({ data: [], error: null })
+  }),
+  channel: () => ({
+    on: () => ({ subscribe: () => {} })
+  })
+});
+
+// Use real client if configured, otherwise use mock
+export const getSupabaseClient = () => {
+  if (isSupabaseConfigured && supabase) {
+    return supabase;
+  }
+  return createMockSupabaseClient();
+};
     }
   }
 });

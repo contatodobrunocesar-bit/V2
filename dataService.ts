@@ -9,6 +9,8 @@ import {
   settingsService, 
   integrationService 
 } from './lib/supabaseService';
+import { isSupabaseConfigured } from './lib/supabase';
+import { MOCK_CURRENT_USER, MOCK_RESPONSIBLES } from './constants';
 
 export { MOCK_RESPONSIBLES_MAP } from './constants';
 
@@ -37,6 +39,17 @@ export const initializeData = async (
   onSyncStatusChange('syncing');
 
   try {
+    // Se Supabase não está configurado, usar modo offline
+    if (!isSupabaseConfigured) {
+      console.warn('Supabase não configurado - executando em modo offline');
+      currentUser = MOCK_CURRENT_USER;
+      currentUserId = 'offline-user';
+      localState.teamMembers = MOCK_RESPONSIBLES;
+      localState.integrations = initialIntegrations;
+      onSyncStatusChange('idle');
+      return { user: MOCK_CURRENT_USER, error: null };
+    }
+
     // Verificar se há usuário logado
     const user = await authService.getCurrentUser();
     
@@ -105,6 +118,8 @@ const loadUserData = async (userId: string, initialIntegrations: Integration[]) 
 
 // Configurar subscriptions em tempo real
 const setupRealtimeSubscriptions = (userId: string) => {
+  if (!isSupabaseConfigured) return;
+  
   // Subscription para campanhas
   campaignService.subscribeToCampaigns(userId, (campaigns) => {
     localState.campaigns = campaigns;
@@ -116,6 +131,16 @@ export const login = async (email: string, password?: string): Promise<User | nu
   try {
     onSyncStatusChange('syncing');
     
+    // Se Supabase não está configurado, usar modo offline
+    if (!isSupabaseConfigured) {
+      console.warn('Supabase não configurado - login offline');
+      currentUser = MOCK_CURRENT_USER;
+      currentUserId = 'offline-user';
+      localState.teamMembers = MOCK_RESPONSIBLES;
+      onSyncStatusChange('idle');
+      return MOCK_CURRENT_USER;
+    }
+
     // Para compatibilidade com o sistema anterior, se não há senha, fazer signup automático
     let authResult;
     if (password) {
@@ -153,7 +178,7 @@ export const login = async (email: string, password?: string): Promise<User | nu
     return null;
   } catch (error: any) {
     onSyncStatusChange('error');
-    console.error('Erro no login:', error);
+    console.error('Erro no login:', error.message);
     return null;
   }
 };
