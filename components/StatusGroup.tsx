@@ -41,7 +41,7 @@ const StatusGroup: React.FC<StatusGroupProps> = ({
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         const campaignId = e.dataTransfer.getData('campaignId');
-        if (campaignId && campaignId !== draggedCampaignId) { // check if it's not the same item
+        if (campaignId && draggedCampaignId && campaignId === draggedCampaignId) {
              onCampaignStatusChange(campaignId, status);
         }
         setIsDragOver(false);

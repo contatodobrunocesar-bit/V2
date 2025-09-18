@@ -49,8 +49,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
     return (
         <div className="flex min-h-screen bg-white dark:bg-dark-bg">
             {/* Left Panel */}
-            <div className="hidden lg:flex w-1/2 items-center justify-center bg-gradient-to-tr from-primary to-secondary p-12 text-white relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full bg-black opacity-20"></div>
+            <div className="hidden lg:flex w-1/2 items-center justify-center bg-black p-12 text-white relative overflow-hidden">
                 <div className="z-10 text-center">
                     <h1 className="text-4xl font-bold mb-4">Pauta de Mídia SECOM</h1>
                 </div>
