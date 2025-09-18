@@ -4,24 +4,36 @@ import { Database } from './database.types';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Check if Supabase is properly configured
-export const isSupabaseConfigured = supabaseUrl && 
+// Check if Supabase is properly configured with real values
+export const isSupabaseConfigured = Boolean(
+  supabaseUrl && 
   supabaseAnonKey && 
   supabaseUrl !== 'https://your-project.supabase.co' && 
-  supabaseAnonKey !== 'your-anon-key';
+  supabaseAnonKey !== 'your-anon-key' &&
+  supabaseUrl.startsWith('https://') &&
+  supabaseUrl.includes('.supabase.co')
+);
 
-export const supabase = isSupabaseConfigured ? createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10
+// Only create client if properly configured
+export const supabase = isSupabaseConfigured ? (() => {
+  try {
+    return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      },
+      realtime: {
+        params: {
+          eventsPerSecond: 10
+        }
+      }
+    });
+  } catch (error) {
+    console.warn('Erro ao criar cliente Supabase:', error);
+    return null;
     }
   }
-}) : null;
 
 // Mock client for offline mode
 export const createMockSupabaseClient = () => ({

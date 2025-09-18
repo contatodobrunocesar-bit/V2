@@ -131,7 +131,7 @@ export const login = async (email: string, password?: string): Promise<User | nu
   try {
     onSyncStatusChange('syncing');
     
-    // Se Supabase não está configurado, usar modo offline
+    // Se Supabase não está configurado ou não funciona, usar modo offline
     if (!isSupabaseConfigured) {
       console.warn('Supabase não configurado - login offline');
       currentUser = MOCK_CURRENT_USER;
@@ -144,40 +144,63 @@ export const login = async (email: string, password?: string): Promise<User | nu
     // Usar senha padrão se não fornecida
     const loginPassword = password || 'Gov@2025+';
     
-    let authResult;
-    
-    // Tentar login primeiro
-    authResult = await authService.signIn(email, loginPassword);
-    
-    // Se falhar e for a senha padrão, tentar criar conta
-    if (authResult.error && loginPassword === 'Gov@2025+') {
-      const name = email.split('@')[0].replace(/[.-]/g, ' ');
-      authResult = await authService.signUp(email, loginPassword, name);
-      if (authResult.error) {
-        throw new Error('Erro ao fazer login ou criar conta: ' + authResult.error.message);
-      }
-    }
-
-    if (authResult.error) {
-      throw new Error(authResult.error.message);
-    }
-
-    if (authResult.data.user) {
-      currentUserId = authResult.data.user.id;
-      const profile = await profileService.getProfile(authResult.data.user.id);
+    try {
+      let authResult;
       
-      if (profile) {
-        currentUser = profile;
-        await loadUserData(authResult.data.user.id, localState.integrations);
-        setupRealtimeSubscriptions(authResult.data.user.id);
-        onSyncStatusChange('synced');
-        return profile;
+      // Tentar login primeiro
+      authResult = await authService.signIn(email, loginPassword);
+      
+      // Se falhar e for a senha padrão, tentar criar conta
+      if (authResult.error && loginPassword === 'Gov@2025+') {
+        const name = email.split('@')[0].replace(/[.-]/g, ' ');
+        authResult = await authService.signUp(email, loginPassword, name);
+        if (authResult.error) {
+          throw new Error('Erro ao fazer login ou criar conta: ' + authResult.error.message);
+        }
       }
+
+      if (authResult.error) {
+        throw new Error(authResult.error.message);
+      }
+
+      if (authResult.data.user) {
+        currentUserId = authResult.data.user.id;
+        const profile = await profileService.getProfile(authResult.data.user.id);
+        
+        if (profile) {
+          currentUser = profile;
+          await loadUserData(authResult.data.user.id, localState.integrations);
+          setupRealtimeSubscriptions(authResult.data.user.id);
+          onSyncStatusChange('synced');
+          return profile;
+        }
+      }
+    } catch (networkError: any) {
+      // Se houver erro de rede (Failed to fetch), usar modo offline
+      if (networkError.message?.includes('Failed to fetch') || networkError.message?.includes('fetch')) {
+        console.warn('Erro de conexão - usando modo offline:', networkError.message);
+        currentUser = MOCK_CURRENT_USER;
+        currentUserId = 'offline-user';
+        localState.teamMembers = MOCK_RESPONSIBLES;
+        onSyncStatusChange('idle');
+        return MOCK_CURRENT_USER;
+      }
+      throw networkError;
     }
-    
+
     onSyncStatusChange('error');
     return null;
   } catch (error: any) {
+    // Fallback final para modo offline em caso de qualquer erro
+    if (error.message?.includes('Failed to fetch') || error.message?.includes('fetch')) {
+      console.warn('Fallback para modo offline devido a erro de rede');
+      currentUser = MOCK_CURRENT_USER;
+      currentUserId = 'offline-user';
+      localState.teamMembers = MOCK_RESPONSIBLES;
+      onSyncStatusChange('idle');
+      return MOCK_CURRENT_USER;
+    }
+    
     onSyncStatusChange('error');
     console.error('Erro no login:', error.message);
     return null;
